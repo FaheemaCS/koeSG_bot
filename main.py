@@ -151,14 +151,14 @@ to provide confidential guidance.
         await start(update, context)
 
 def main():
-    token = "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI"  # Replace with your actual token
+    token = os.getenv("BOT_TOKEN", "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI")  # Fixed token loading
     application = Application.builder().token(token).build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button_handler))
     
-    print("Bot is running...")
-    application.run_polling()
+    print("Bot is running (Polling Mode)...")
+    application.run_polling(drop_pending_updates=True)  # Critical fi
 
 if __name__ == '__main__':
     main()
