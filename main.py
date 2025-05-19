@@ -1,6 +1,9 @@
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 import telegram
+import os
+
+token = os.getenv("8097068704:AAHq7aMU7AtedTpG1Ynjfa3RS7BTM4CPSMs")
 
 # Helper function to create back button
 def back_button(target='main'):
@@ -148,7 +151,7 @@ to provide confidential guidance.
         await start(update, context)
 
 def main():
-    token = "8097068704:AAHq7aMU7AtedTpG1Ynjfa3RS7BTM4CPSMs"  # Replace with your actual token
+    token = "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI"  # Replace with your actual token
     application = Application.builder().token(token).build()
     
     application.add_handler(CommandHandler('start', start))
