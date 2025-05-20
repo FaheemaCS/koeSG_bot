@@ -4,6 +4,14 @@ import telegram
 import os
 
 token = os.getenv("8097068704:AAHq7aMU7AtedTpG1Ynjfa3RS7BTM4CPSMs")
+from flask import Flask  # Required for Render health checks
+
+# Initialize Flask app for health checks
+app = Flask(__name__)
+
+@app.route('/')
+def health_check():
+    return "OK", 200
 
 # Helper function to create back button
 def back_button(target='main'):
@@ -151,14 +159,34 @@ to provide confidential guidance.
         await start(update, context)
 
 def main():
-    token = os.getenv("BOT_TOKEN", "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI")  # Fixed token loading
+    token = os.getenv("BOT_TOKEN", "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI")
     application = Application.builder().token(token).build()
     
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CallbackQueryHandler(button_handler))
-    
-    print("Bot is running (Polling Mode)...")
-    application.run_polling(drop_pending_updates=True)  # Critical fi
+
+    # Render-specific setup
+    if os.getenv('RENDER'):  # Detect if running on Render
+        port = int(os.environ.get("PORT", 8443))
+        webhook_url = f"https://your-service-name.onrender.com/{token}"
+        
+        # Start webhook
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=port,
+            webhook_url=webhook_url,
+            drop_pending_updates=True
+        )
+    else:
+        # Local development with polling
+        application.run_polling(drop_pending_updates=True)
 
 if __name__ == '__main__':
+    # Start Flask server for health checks
+    from threading import Thread
+    Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 3000}).start()
+    
+    # Start Telegram bot
     main()
+
+
