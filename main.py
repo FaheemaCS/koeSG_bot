@@ -158,6 +158,8 @@ to provide confidential guidance.
     elif query.data == 'main':
         await start(update, context)
 
+
+
 def main():
     token = os.getenv("BOT_TOKEN", "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI")
     application = Application.builder().token(token).build()
@@ -168,7 +170,7 @@ def main():
     # Render-specific setup
     if os.getenv('RENDER'):  # Detect if running on Render
         port = int(os.environ.get("PORT", 8443))
-        webhook_url = f"https://your-service-name.onrender.com/{token}"
+        webhook_url = f"https://koesg-bot.onrender.com/{token}"
         
         # Start webhook
         application.run_webhook(
