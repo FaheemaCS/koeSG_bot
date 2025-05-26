@@ -3,7 +3,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 import telegram
 import os
 
-token = os.getenv("8097068704:AAHq7aMU7AtedTpG1Ynjfa3RS7BTM4CPSMs")
+token = os.getenv("7750078176:AAFstaPP2l1-K3veM-RnFoSYIVq1iwK0KCA")
 from flask import Flask  # Required for Render health checks
 
 # Initialize Flask app for health checks
@@ -161,7 +161,7 @@ to provide confidential guidance.
 
 
 def main():
-    token = os.getenv("BOT_TOKEN", "7975694771:AAGgljJg2hQudGNpfL73Vb9qc2tFlimUElI")
+    token = os.getenv("BOT_TOKEN", "7750078176:AAFstaPP2l1-K3veM-RnFoSYIVq1iwK0KCA")
     application = Application.builder().token(token).build()
     
     application.add_handler(CommandHandler('start', start))
