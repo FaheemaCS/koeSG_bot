@@ -2,9 +2,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 import telegram
 import os
-
-token = os.getenv("7750078176:AAFstaPP2l1-K3veM-RnFoSYIVq1iwK0KCA")
-from flask import Flask  # Required for Render health checks
+from flask import Flask
 
 # Initialize Flask app for health checks
 app = Flask(__name__)
@@ -13,182 +11,219 @@ app = Flask(__name__)
 def health_check():
     return "OK", 200
 
+# Bot Token (replace with your actual token)
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or "7750078176:AAFstaPP2l1-K3veM-RnFoSYIVq1iwK0KCA"
+
 # Helper function to create back button
-def back_button(target='main'):
+def back_button(target='start'):
     return [InlineKeyboardButton("🔙 Back", callback_data=target)]
+
+# ======================
+# COMMAND HANDLERS
+# ======================
 
 async def start(update: Update, context):
     keyboard = [
-        [InlineKeyboardButton("🆘 Immediate Help Needed", callback_data='emergency')],
-        [InlineKeyboardButton("❓ Understand My Options", callback_data='options')],
-        [InlineKeyboardButton("⚖️ Learn About Rights", callback_data='rights')],
-        [InlineKeyboardButton("💬 Emotional Support", callback_data='support')],
-        [InlineKeyboardButton("ℹ️ About This Bot", callback_data='about')]
+        [InlineKeyboardButton("Join our Community", callback_data='community')],
+        [InlineKeyboardButton("I need help (Crisis & Reporting)", callback_data='help')],
+        [InlineKeyboardButton("Support & Resources", callback_data='support')],
+        [InlineKeyboardButton("Self Care & Healing", callback_data='care')],
+        [InlineKeyboardButton("Learn & Volunteer", callback_data='learn')],
+        [InlineKeyboardButton("Feedback", callback_data='feedback')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Only show intro text if this is a /start command (update.message exists)
     if update.message:
         intro_text = """
 🤝 *About KOE & This Bot* 🤝
 
-KOE is a Singapore-based initiative committed to supporting survivors of sexual assault with empathy, care, and confidentiality.
+Hello! This bot was created by KOE, a project that strives to amplify voices of sexual assault survivors in Singapore. 
 
-This bot, *Koe_SG*, was developed in collaboration with students from the Singapore Institute of Technology (SIT). It provides immediate information, emotional support contacts, and guides on legal and medical options for survivors in Singapore.
+We are here to support sexual assault survivors by providing a one-stop centre for all types of resources required such as self care tips, resources for counselling or legal assistance, or helplines when in need. This bot can also support you (friends/families of survivors) in order to better support your loved ones when faced with such circumstances. 
 
-You are not alone — help is available. 💙
+This bot ensures privacy and confidentiality, thereby your user is kept completely anonymous. If you would like to reach out to KOE for any matters, do email us via gmail at koebusiness2022@gmail.com
 """
         await update.message.reply_text(intro_text, parse_mode='Markdown')
         await update.message.reply_text("Please choose an option below:", reply_markup=reply_markup)
     else:
-        # For callback queries (back button), just show the menu
         await update.callback_query.edit_message_text("Please choose an option below:", reply_markup=reply_markup)
 
+# ======================
+# MENU OPTION HANDLERS
+# ======================
 
-async def button_handler(update: Update, context):
+async def community(update: Update, context):
+    text = """
+🌟 *Join Our Community* 🌟  
+
+Connect with survivors and allies in a safe, moderated space:  
+- [KOE Support Group](https://t.me/koe_support) (Private, survivors-only)  
+- [Public Awareness Channel](https://t.me/koe_public) (Updates/resources)  
+
+Rules:  
+1. Respect anonymity.  
+2. No victim-blaming.  
+3. Trigger warnings for sensitive content.  
+"""
+    keyboard = [back_button()]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def help(update: Update, context):
+    text = """
+🚨 *Immediate Help* 🚨  
+
+If you're in crisis, contact these Singapore-based resources:  
+- **SOS Helpline**: 1767 (24/7)  
+- **AWARE Helpline**: 1800 777 5555 (Mon–Fri, 10am–6pm)  
+- **Police**: 999 (Emergency) / 1800 255 0000 (Non-emergency)  
+
+For anonymous reporting:  
+- [Submit to KOE](https://forms.gle/EXAMPLE) (We'll guide you).  
+"""
+    keyboard = [
+        [InlineKeyboardButton("Legal Guidance", callback_data='legal')],
+        [InlineKeyboardButton("Medical Support", callback_data='medical')],
+        back_button()
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def support(update: Update, context):
+    text = """
+📚 *Support & Resources* 📚  
+
+1. **Counseling**:  
+   - [AWARE Counseling](https://aware.org.sg) (Low-cost)  
+   - [RAINBOW Centre](https://rainbowcentre.sg) (For minors)  
+
+2. **Legal Aid**:  
+   - [Legal Aid Bureau](https://lab.mlaw.gov.sg) (Income-based)  
+
+3. **Financial Assistance**:  
+   - [MSF ComCare](https://www.msf.gov.sg)  
+"""
+    keyboard = [
+        [InlineKeyboardButton("Download Resource Pack", callback_data='download')],
+        back_button()
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def care(update: Update, context):
+    text = """
+💖 *Self-Care & Healing* 💖  
+
+Try these exercises:  
+- **Grounding Technique**: Name 5 things you see, 4 you hear, 3 you touch...  
+- **Journal Prompt**: *"What's one small win today?"*  
+
+Resources:  
+- [Guided Meditations](https://youtube.com/playlist?list=EXAMPLE)  
+- [Free Therapy Workbooks](https://example.com/workbooks)  
+"""
+    keyboard = [
+        [InlineKeyboardButton("Daily Reminders", callback_data='reminders')],
+        [InlineKeyboardButton("Coping Strategies", callback_data='coping')],
+        back_button()
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def learn(update: Update, context):
+    text = """
+📢 *Learn & Volunteer* 📢  
+
+**Educational Guides**:  
+- [Understanding Consent](https://example.com/consent)  
+- [How to Support Survivors](https://example.com/support-guide)  
+
+**Volunteer Opportunities**:  
+- Join KOE's outreach team (Email us!).  
+- Help moderate our community chats.  
+"""
+    keyboard = [
+        [InlineKeyboardButton("Upcoming Events", callback_data='events')],
+        back_button()
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def feedback(update: Update, context):
+    text = """
+📝 *Feedback* 📝  
+
+We'd love to hear from you!  
+- **Bot suggestions**  
+- **Resource requests**  
+- **Anonymous testimonial**  
+
+Email us: koebusiness2022@gmail.com  
+"""
+    keyboard = [back_button()]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+# ======================
+# SUB-MENU HANDLERS
+# ======================
+
+async def legal(update: Update, context):
+    text = "⚖️ *Legal Guidance*\n\nContent coming soon..."
+    reply_markup = InlineKeyboardMarkup([back_button('help')])
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def medical(update: Update, context):
+    text = "🏥 *Medical Support*\n\nContent coming soon..."
+    reply_markup = InlineKeyboardMarkup([back_button('help')])
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+# ======================
+# GENERIC CALLBACK HANDLER
+# ======================
+
+async def handle_callback(update: Update, context):
     query = update.callback_query
-    try:
-        await query.answer()
-    except telegram.error.BadRequest as e:
-        if "Query is too old" in str(e):
-            # Ignore old queries
-            return
-        raise e
+    await query.answer()
     
-    # Main menu options
-    if query.data == 'emergency':
-        response = """
-🆘 *Immediate Help Needed* 🆘
-
-*24/7 Emergency Contacts:*
-- Police: 999
-- Sexual Assault Care Centre: 6779 0282
-- AWARE Helpline: 1800 777 5555
-"""
-        reply_markup = InlineKeyboardMarkup([back_button()])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    elif query.data == 'options':
-        keyboard = [
-            [InlineKeyboardButton("🏥 Medical Attention", callback_data='medical')],
-            [InlineKeyboardButton("👮 Reporting Options", callback_data='reporting')],
-            [InlineKeyboardButton("⚖️ Legal Advice", callback_data='legal')],
-            back_button()
-        ]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await query.edit_message_text("❓ *Understand My Options*\nSelect a category:", reply_markup=reply_markup, parse_mode='Markdown')
-    
-    # Sub-options under "Understand My Options"
-    elif query.data == 'medical':
-        response = """
-🏥 *Medical Attention Guide* 🏥
-
-*Where to go:*
-- KK Women's and Children's Hospital (24/7)
-- Singapore General Hospital (24/7)
-"""
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔙 Back to Options", callback_data='options')],
-            back_button()
-        ])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    elif query.data == 'reporting':
-        response = """
-👮 *Reporting Options* 👮
-
-1. Police report: 999 or any station
-2. University reporting (if applicable)
-3. Anonymous options available
-"""
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔙 Back to Options", callback_data='options')],
-            back_button()
-        ])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    elif query.data == 'legal':
-        response = """
-⚖️ *Legal Advice* ⚖️
-
-- Free legal clinics available
-- Protection orders
-- Court accompaniment services
-"""
-        reply_markup = InlineKeyboardMarkup([
-            [InlineKeyboardButton("🔙 Back to Options", callback_data='options')],
-            back_button()
-        ])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    # Other main menu options
-    elif query.data == 'rights':
-        response = """
-⚖️ *Your Legal Rights* ⚖️
-
-- Right to be treated with dignity
-- Right to have a support person
-- Right to request female officers
-"""
-        reply_markup = InlineKeyboardMarkup([back_button()])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    elif query.data == 'support':
-        response = """
-💬 *Emotional Support* 💬
-
-- AWARE Counseling: 1800 777 5555
-- SOS Helpline: 1767
-- Online chat support available
-"""
-        reply_markup = InlineKeyboardMarkup([back_button()])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    elif query.data == 'about':
-        response = """
-ℹ️ *About This Bot* ℹ️
-
-Created by KOE and SIT students
-to provide confidential guidance.
-"""
-        reply_markup = InlineKeyboardMarkup([back_button()])
-        await query.edit_message_text(response, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    # Navigation handlers
-    elif query.data == 'main':
+    # Handle back button
+    if query.data == 'start':
         await start(update, context)
+    # Add other specific cases if needed
 
-
+# ======================
+# MAIN APPLICATION SETUP
+# ======================
 
 def main():
-    token = os.getenv("BOT_TOKEN", "7750078176:AAFstaPP2l1-K3veM-RnFoSYIVq1iwK0KCA")
-    application = Application.builder().token(token).build()
-    
-    application.add_handler(CommandHandler('start', start))
-    application.add_handler(CallbackQueryHandler(button_handler))
+    # Create Application
+    application = Application.builder().token(TOKEN).build()
 
-    # Render-specific setup
-    if os.getenv('RENDER'):  # Detect if running on Render
-        port = int(os.environ.get("PORT", 8443))
-        webhook_url = f"https://koesg-bot.onrender.com/{token}"
-        
-        # Start webhook
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=port,
-            webhook_url=webhook_url,
-            drop_pending_updates=True
-        )
-    else:
-        # Local development with polling
-        application.run_polling(drop_pending_updates=True)
+    # Add command handlers
+    application.add_handler(CommandHandler('start', start))
+
+    # Add main menu handlers
+    application.add_handler(CallbackQueryHandler(community, pattern='^community$'))
+    application.add_handler(CallbackQueryHandler(help, pattern='^help$'))
+    application.add_handler(CallbackQueryHandler(support, pattern='^support$'))
+    application.add_handler(CallbackQueryHandler(care, pattern='^care$'))
+    application.add_handler(CallbackQueryHandler(learn, pattern='^learn$'))
+    application.add_handler(CallbackQueryHandler(feedback, pattern='^feedback$'))
+
+    # Add sub-menu handlers
+    application.add_handler(CallbackQueryHandler(legal, pattern='^legal$'))
+    application.add_handler(CallbackQueryHandler(medical, pattern='^medical$'))
+
+    # Add generic callback handler for back button
+    application.add_handler(CallbackQueryHandler(handle_callback))
+
+    # Start Flask server for health checks (Render compatibility)
+    if os.getenv('RENDER'):
+        from threading import Thread
+        Thread(target=lambda: app.run(host='0.0.0.0', port=8080)).start()
+
+    # Start the Bot
+    application.run_polling()
 
 if __name__ == '__main__':
-    # Start Flask server for health checks
-    from threading import Thread
-    Thread(target=app.run, kwargs={'host': '0.0.0.0', 'port': 3000}).start()
-    
-    # Start Telegram bot
     main()
-
-
