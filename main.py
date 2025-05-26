@@ -71,24 +71,145 @@ Rules:
 
 async def help(update: Update, context):
     text = """
-🚨 *Immediate Help* 🚨  
+🚨 *I need help (Crisis & Reporting)* 🚨  
 
-If you're in crisis, contact these Singapore-based resources:  
-- **SOS Helpline**: 1767 (24/7)  
-- **AWARE Helpline**: 1800 777 5555 (Mon–Fri, 10am–6pm)  
-- **Police**: 999 (Emergency) / 1800 255 0000 (Non-emergency)  
+Hello, thank you for reaching out! Please share if you are currently in an emergency.
 
-For anonymous reporting:  
-- [Submit to KOE](https://forms.gle/EXAMPLE) (We'll guide you).  
+Examples of emergencies: 
+- Police: a sexual assault/harassment case is currently/has just happened and you would like to report it immediately
+- SOS: if you have thoughts of hurting yourself or those around you.
 """
     keyboard = [
-        [InlineKeyboardButton("Legal Guidance", callback_data='legal')],
-        [InlineKeyboardButton("Medical Support", callback_data='medical')],
+        [InlineKeyboardButton("Yes, I need to call the police now", callback_data='emergency_police')],
+        [InlineKeyboardButton("Yes, I need to call SOS now", callback_data='emergency_sos')],
+        [InlineKeyboardButton("No, I'm not in emergency - show helplines", callback_data='helplines')],
         back_button()
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
 
+async def emergency_police(update: Update, context):
+    text = """
+🚔 *Emergency Police Assistance* 🚔
+
+Please call **999** immediately if you're in danger.
+
+For non-emergency police assistance, call **1800 255 0000**.
+
+Would you like me to:
+1. Provide the number to copy?
+2. Open your phone app with the number ready to call?
+"""
+    keyboard = [
+        [InlineKeyboardButton("Copy Police Number", callback_data='copy_police')],
+        [InlineKeyboardButton("Open Phone App", callback_data='call_police')],
+        back_button('help')
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def emergency_sos(update: Update, context):
+    text = """
+🆘 *Emergency SOS Assistance* 🆘
+
+Please call **1767** immediately for SOS (Samaritans of Singapore).
+
+They provide 24/7 emotional support for those in distress.
+
+Would you like me to:
+1. Provide the number to copy?
+2. Open your phone app with the number ready to call?
+"""
+    keyboard = [
+        [InlineKeyboardButton("Copy SOS Number", callback_data='copy_sos')],
+        [InlineKeyboardButton("Open Phone App", callback_data='call_sos')],
+        back_button('help')
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+async def helplines(update: Update, context):
+    text = """
+📞 *Helplines* 📞
+
+Thank you for reaching out! Below are specialized helplines:
+
+🔹 *Sexual Assault Support (All Genders)*:
+- AWARE: Call 6779 0282 (Mon-Fri, 10am-6pm)
+- Care Corner: 6476 1482 or projectstart@carecorner.org.sg
+
+🔹 *Workplace Harassment*:
+- AWARE: 6950 9191 (Mon-Fri, 10am-6pm)
+
+🔹 *For Sex Workers*:
+- Project X: 9060 9906 (3pm-11:30pm)
+
+🔹 *For Primary School Children*:
+- Tinkle Friend: 1800 274 4788
+
+🔹 *LGBTQ+ Support*:
+- Oogachaga: WhatsApp 8592 0609 (Tue/Thu 7pm-10pm, Sat 2pm-5pm)
+
+🔹 *Online Harassment*:
+- SCWO: 8001 01 4616 or WhatsApp 6571 4400 (9am-9pm)
+"""
+    keyboard = [
+        [InlineKeyboardButton("Legal Guidance", callback_data='legal')],
+        [InlineKeyboardButton("Medical Support", callback_data='medical')],
+        back_button('help')
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.callback_query.edit_message_text(text, parse_mode='Markdown', reply_markup=reply_markup)
+
+# Add these new handlers to your main application setup:
+def main():
+    application = Application.builder().token(TOKEN).build()
+    
+    # Existing handlers...
+    application.add_handler(CallbackQueryHandler(help, pattern='^help$'))
+    application.add_handler(CallbackQueryHandler(emergency_police, pattern='^emergency_police$'))
+    application.add_handler(CallbackQueryHandler(emergency_sos, pattern='^emergency_sos$'))
+    application.add_handler(CallbackQueryHandler(helplines, pattern='^helplines$'))
+    application.add_handler(CallbackQueryHandler(legal, pattern='^legal$'))
+    application.add_handler(CallbackQueryHandler(medical, pattern='^medical$'))
+    
+    # New utility handlers
+    application.add_handler(CallbackQueryHandler(copy_number, pattern='^copy_.*$'))
+    application.add_handler(CallbackQueryHandler(call_number, pattern='^call_.*$'))
+    
+    # ... rest of your setup
+
+async def copy_number(update: Update, context):
+    query = update.callback_query
+    number_type = query.data.replace('copy_', '')
+    
+    numbers = {
+        'police': '999',
+        'sos': '1767'
+    }
+    
+    await query.answer(f"Number copied: {numbers.get(number_type, '')}", show_alert=True)
+    await query.edit_message_reply_markup()  # Keep same message but update buttons
+
+async def call_number(update: Update, context):
+    query = update.callback_query
+    number_type = query.data.replace('call_', '')
+    
+    numbers = {
+        'police': 'tel:999',
+        'sos': 'tel:1767'
+    }
+    
+    keyboard = [
+        [InlineKeyboardButton("↗️ Open Phone App", url=numbers.get(number_type))],
+        back_button('help')
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    await query.edit_message_reply_markup(reply_markup)
+    await query.answer("Please check your phone dialer app")
+
+    
 async def support(update: Update, context):
     text = """
 📚 *Support & Resources* 📚  
